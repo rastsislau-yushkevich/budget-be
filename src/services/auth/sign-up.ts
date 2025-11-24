@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import { assignTokens } from "@/lib/helpers/assign-tokens";
 
 const userRepo = AppDataSource.getRepository(User);
 
@@ -28,9 +29,17 @@ export const signUp = async ({
 		password: hashedPassword,
 	});
 
-	const savedUser = await userRepo.save(newUser);
+	const tokens = assignTokens({
+		email: newUser.email,
+		username: newUser.username,
+	});
+
+	const savedUser = await userRepo.save({
+		...newUser,
+		refreshToken: tokens.refreshToken,
+	});
 
 	delete savedUser.password;
 
-	return savedUser;
+	return tokens;
 };
