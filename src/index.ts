@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import express from "express";
 import authRouter from "./controllers/auth";
 import { AppDataSource } from "./data-source";
@@ -5,6 +6,7 @@ import { env } from "./env";
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 AppDataSource.initialize()
 	.then(async () => {
