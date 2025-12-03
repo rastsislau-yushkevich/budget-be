@@ -9,7 +9,9 @@ export const signUp = async ({
 	email,
 	username,
 	password,
-}: Pick<User, "email" | "username" | "password">) => {
+	locale,
+	market,
+}: Pick<User, "email" | "username" | "password" | "locale" | "market">) => {
 	const userByUsername = await userRepo.findOneBy({ username: username });
 	const userByEmail = await userRepo.findOneBy({ email: email });
 
@@ -27,6 +29,8 @@ export const signUp = async ({
 		email,
 		username,
 		password: hashedPassword,
+		locale,
+		market,
 	});
 
 	const tokens = assignTokens({

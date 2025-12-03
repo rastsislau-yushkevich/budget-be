@@ -16,6 +16,7 @@ export class User {
 
 	@UpdateDateColumn()
 	updatedAt: Date;
+
 	@Column({ unique: true })
 	email: string;
 
@@ -33,4 +34,10 @@ export class User {
 
 	@Column({ nullable: true })
 	refreshToken: string;
+
+	@Column()
+	market: string;
+
+	@Column()
+	locale: string;
 }

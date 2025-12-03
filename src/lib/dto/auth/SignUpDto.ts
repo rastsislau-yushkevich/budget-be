@@ -11,4 +11,10 @@ export class SignUpDto {
 	@IsString()
 	@MinLength(6)
 	password: string;
+
+	@IsString()
+	locale: string;
+
+	@IsString()
+	market: string;
 }
