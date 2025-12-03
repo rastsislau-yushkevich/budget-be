@@ -4,8 +4,6 @@ import { validateDto } from "@/middlewares/validate";
 import { refresh } from "./refresh";
 import { signIn } from "./sign-in";
 import { signUp } from "./sign-up";
-import { connect } from "../tink/connect";
-import { authMiddleware } from "@/middlewares/auth";
 
 const router = express.Router();
 
