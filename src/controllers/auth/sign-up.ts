@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { signUp as signUpService } from "@/services/auth";
 
 export const signUp = async (req: Request, res: Response) => {
-	const { email, username, password } = req.body;
+	const { email, username, password, locale, market } = req.body;
 
 	if (!email || !username || !password) {
 		return res
@@ -10,7 +10,7 @@ export const signUp = async (req: Request, res: Response) => {
 			.json({ message: "Email, username and password are required" });
 	}
 
-	const tokens = await signUpService({ email, username, password });
+	const tokens = await signUpService({ email, username, password, locale, market });
 
 	if (!tokens) {
 		return res.status(400).json({ message: "Incorrect sign-up data" });
