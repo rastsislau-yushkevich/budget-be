@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { AppDataSource } from "@/data-source";
 import { User } from "@/entity/User";
+import { BadRequestError } from "@/lib/errors";
 import { assignTokens } from "@/lib/helpers/assign-tokens";
 
 const userRepo = AppDataSource.getRepository(User);
@@ -16,11 +17,11 @@ export const signUp = async ({
 	const userByEmail = await userRepo.findOneBy({ email: email });
 
 	if (userByUsername) {
-		throw new Error("User with this username already exists");
+		throw new BadRequestError("User with this username already exists");
 	}
 
 	if (userByEmail) {
-		throw new Error("User with this email already exists");
+		throw new BadRequestError("User with this email already exists");
 	}
 
 	const hashedPassword = await bcrypt.hash(password, 10);

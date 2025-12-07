@@ -4,25 +4,19 @@ import { signUp as signUpService } from "@/services/auth";
 export const signUp = async (req: Request, res: Response) => {
 	const { email, username, password, locale, market } = req.body;
 
-	if (!email || !username || !password) {
+	try {
+		const tokens = await signUpService({
+			email,
+			username,
+			password,
+			locale,
+			market,
+		});
+
 		return res
-			.status(400)
-			.json({ message: "Email, username and password are required" });
+			.status(200)
+			.json({ message: "User signed up successfully", tokens });
+	} catch (error) {
+		return res.status(error.status).json({ message: error.message });
 	}
-
-	const tokens = await signUpService({
-		email,
-		username,
-		password,
-		locale,
-		market,
-	});
-
-	if (!tokens) {
-		return res.status(400).json({ message: "Incorrect sign-up data" });
-	}
-
-	return res
-		.status(200)
-		.json({ message: "User signed up successfully", tokens });
 };

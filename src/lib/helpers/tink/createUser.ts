@@ -1,5 +1,6 @@
 import axios from "axios";
 import { env } from "@/env";
+import { InternalServerError } from "@/lib/errors";
 
 export const createUser = async ({
 	appAccessToken,
@@ -27,8 +28,8 @@ export const createUser = async ({
 				},
 			},
 		);
-		return { data: res.data, error: null };
-	} catch (error) {
-		return { data: null, error: error.message };
+		return res.data;
+	} catch (_error) {
+		throw new InternalServerError("Failed to create Tink user");
 	}
 };

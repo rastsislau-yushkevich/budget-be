@@ -1,5 +1,6 @@
 import axios from "axios";
 import { env } from "@/env";
+import { InternalServerError } from "@/lib/errors";
 
 export const authorize = async (scope: string) => {
 	const data = new URLSearchParams();
@@ -7,13 +8,14 @@ export const authorize = async (scope: string) => {
 	data.append("scope", scope);
 	data.append("client_id", env.TINK_CLIENT_ID);
 	data.append("client_secret", env.TINK_CLIENT_SECRET);
+
 	try {
 		const res = await axios.post(
 			`${env.TINK_BASE_URL}/api/v1/oauth/token`,
 			data,
 		);
-		return { data: res.data, error: null };
-	} catch (error) {
-		return { data: null, error: error.message };
+		return res.data;
+	} catch (_error) {
+		throw new InternalServerError("Failed to authorize Tink client");
 	}
 };

@@ -1,20 +1,25 @@
 import jwt, { type JwtPayload } from "jsonwebtoken";
+import { UnauthorizedError } from "@/lib/errors";
 import { assignTokens } from "@/lib/helpers/assign-tokens";
 
 export const refresh = async (refreshToken: string) => {
-	const verifiedToken = jwt.verify(
-		refreshToken,
-		process.env.REFRESH_TOKEN_SECRET,
-	) as JwtPayload;
-
-	if (!verifiedToken) {
-		throw new Error("Invalid refresh token");
+	if (!refreshToken) {
+		throw new UnauthorizedError("No refresh token provided");
 	}
 
-	const refreshedTokens = assignTokens({
-		username: verifiedToken.username,
-		email: verifiedToken.email,
-	});
+	try {
+		const verifiedToken = jwt.verify(
+			refreshToken,
+			process.env.REFRESH_TOKEN_SECRET,
+		) as JwtPayload;
 
-	return refreshedTokens;
+		const refreshedTokens = assignTokens({
+			username: verifiedToken.username,
+			email: verifiedToken.email,
+		});
+
+		return refreshedTokens;
+	} catch (_error) {
+		throw new UnauthorizedError("Invalid refresh token");
+	}
 };
