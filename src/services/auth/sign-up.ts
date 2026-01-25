@@ -40,8 +40,7 @@ export const signUp = async ({
 	});
 
 	const savedUser = await userRepo.save({
-		...newUser,
-		refreshToken: tokens.refreshToken,
+		...newUser
 	});
 
 	delete savedUser.password;

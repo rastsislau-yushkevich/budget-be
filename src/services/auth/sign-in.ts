@@ -24,7 +24,5 @@ export const signIn = async ({
 
 	const tokens = assignTokens({ email: user.email, username: user.username });
 
-	await usersRepo.update(user.id, { refreshToken: tokens.refreshToken });
-
 	return tokens;
 };
