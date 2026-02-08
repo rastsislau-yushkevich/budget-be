@@ -5,128 +5,128 @@ import { InternalServerError } from "@/lib/errors";
 const transactionRepository = AppDataSource.getRepository(Transaction);
 
 export const getTransactions = async ({
-  userId,
-  monthIndex,
+	userId,
+	monthIndex,
 }: {
-  userId: string;
-  monthIndex: number;
+	userId: string;
+	monthIndex: number;
 }) => {
-  try {
-    const now = new Date();
-    const targetDate = new Date(
-      now.getFullYear(),
-      now.getMonth() - monthIndex,
-      1,
-    );
-    const year = targetDate.getFullYear();
-    const month = targetDate.getMonth();
+	try {
+		const now = new Date();
+		const targetDate = new Date(
+			now.getFullYear(),
+			now.getMonth() - monthIndex,
+			1,
+		);
+		const year = targetDate.getFullYear();
+		const month = targetDate.getMonth();
 
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+		const startDate = new Date(year, month, 1);
+		const endDate = new Date(year, month + 1, 0, 23, 59, 59);
 
-    const transactions = await transactionRepository
-      .createQueryBuilder("t")
-      .where("t.userId = :userId", { userId })
-      .andWhere("t.transactionDate BETWEEN :startDate AND :endDate", {
-        startDate,
-        endDate,
-      })
-      .orderBy("t.transactionDate", "DESC")
-      .getMany();
+		const transactions = await transactionRepository
+			.createQueryBuilder("t")
+			.where("t.userId = :userId", { userId })
+			.andWhere("t.transactionDate BETWEEN :startDate AND :endDate", {
+				startDate,
+				endDate,
+			})
+			.orderBy("t.transactionDate", "DESC")
+			.getMany();
 
-    return transactions.map((t) => ({
-      id: t.id,
-      name: t.description,
-      category: t.category,
-      amount: Number(t.amount),
-      date: t.transactionDate,
-    }));
-  } catch (error) {
-    throw new InternalServerError("Failed to fetch transactions");
-  }
+		return transactions.map((t) => ({
+			id: t.id,
+			name: t.description,
+			category: t.category,
+			amount: Number(t.amount),
+			date: t.transactionDate,
+		}));
+	} catch (error) {
+		throw new InternalServerError("Failed to fetch transactions");
+	}
 };
 
 export const getMonthlySpending = async ({
-  userId,
-  monthIndex,
+	userId,
+	monthIndex,
 }: {
-  userId: string;
-  monthIndex: number;
+	userId: string;
+	monthIndex: number;
 }) => {
-  try {
-    const now = new Date();
-    const targetDate = new Date(
-      now.getFullYear(),
-      now.getMonth() - monthIndex,
-      1,
-    );
-    const year = targetDate.getFullYear();
-    const month = targetDate.getMonth();
+	try {
+		const now = new Date();
+		const targetDate = new Date(
+			now.getFullYear(),
+			now.getMonth() - monthIndex,
+			1,
+		);
+		const year = targetDate.getFullYear();
+		const month = targetDate.getMonth();
 
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+		const startDate = new Date(year, month, 1);
+		const endDate = new Date(year, month + 1, 0, 23, 59, 59);
 
-    const transactions = await transactionRepository
-      .createQueryBuilder("t")
-      .where("t.userId = :userId", { userId })
-      .andWhere("t.transactionDate BETWEEN :startDate AND :endDate", {
-        startDate,
-        endDate,
-      })
-      .getMany();
+		const transactions = await transactionRepository
+			.createQueryBuilder("t")
+			.where("t.userId = :userId", { userId })
+			.andWhere("t.transactionDate BETWEEN :startDate AND :endDate", {
+				startDate,
+				endDate,
+			})
+			.getMany();
 
-    // Group by category
-    const categoryMap = new Map<string, number>();
-    let totalSpent = 0;
+		// Group by category
+		const categoryMap = new Map<string, number>();
+		let totalSpent = 0;
 
-    const categoryColors: Record<string, string> = {
-      Food: "#22C55E",
-      Housing: "#3B82F6",
-      Transport: "#06B6D4",
-      Entertainment: "#EC4899",
-      Utilities: "#F59E0B",
-      Shopping: "#8B5CF6",
-      Health: "#EF4444",
-      Other: "#6B7280",
-    };
+		const categoryColors: Record<string, string> = {
+			Food: "#22C55E",
+			Housing: "#3B82F6",
+			Transport: "#06B6D4",
+			Entertainment: "#EC4899",
+			Utilities: "#F59E0B",
+			Shopping: "#8B5CF6",
+			Health: "#EF4444",
+			Other: "#6B7280",
+		};
 
-    transactions.forEach((t) => {
-      const amount = Number(t.amount);
-      if (amount < 0) {
-        const expenseAmount = Math.abs(amount);
-        totalSpent += expenseAmount;
-        const current = categoryMap.get(t.category) || 0;
-        categoryMap.set(t.category, current + expenseAmount);
-      }
-    });
+		transactions.forEach((t) => {
+			const amount = Number(t.amount);
+			if (amount < 0) {
+				const expenseAmount = Math.abs(amount);
+				totalSpent += expenseAmount;
+				const current = categoryMap.get(t.category) || 0;
+				categoryMap.set(t.category, current + expenseAmount);
+			}
+		});
 
-    const categories = Array.from(categoryMap.entries()).map(
-      ([category, amount]) => ({
-        category,
-        amount,
-        percentage: totalSpent > 0 ? (amount / totalSpent) * 100 : 0,
-        color: categoryColors[category] || categoryColors.Other,
-      }),
-    );
+		const categories = Array.from(categoryMap.entries()).map(
+			([category, amount]) => ({
+				category,
+				amount,
+				percentage: totalSpent > 0 ? (amount / totalSpent) * 100 : 0,
+				color: categoryColors[category] || categoryColors.Other,
+			}),
+		);
 
-    const currency = transactions.length > 0 ? transactions[0].currency : "PLN";
+		const currency = transactions.length > 0 ? transactions[0].currency : "PLN";
 
-    return {
-      month,
-      year,
-      totalSpent,
-      currency,
-      categories,
-      transactions: transactions.map((t) => ({
-        id: t.id,
-        name: t.description,
-        category: t.category,
-        amount: Number(t.amount),
-        date: t.transactionDate,
-        currency: t.currency,
-      })),
-    };
-  } catch (error) {
-    throw new InternalServerError("Failed to fetch spending data");
-  }
+		return {
+			month,
+			year,
+			totalSpent,
+			currency,
+			categories,
+			transactions: transactions.map((t) => ({
+				id: t.id,
+				name: t.description,
+				category: t.category,
+				amount: Number(t.amount),
+				date: t.transactionDate,
+				currency: t.currency,
+			})),
+		};
+	} catch (error) {
+		throw new InternalServerError("Failed to fetch spending data");
+	}
 };
