@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import authRouter from "./controllers/auth";
 import tinkRouter from "./controllers/tink";
+import financesRouter from "./controllers/finances/router";
 import { AppDataSource } from "./data-source";
 import { env } from "./env";
 
@@ -15,6 +16,7 @@ AppDataSource.initialize()
 
     app.use("/auth", authRouter);
     app.use("/api/tink", tinkRouter);
+    app.use("/api/finances", financesRouter);
 
     app.listen(env.PORT, () => {
       console.log(`Server is running on port ${env.PORT}`);
