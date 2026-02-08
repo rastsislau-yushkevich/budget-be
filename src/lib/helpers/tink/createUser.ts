@@ -29,7 +29,9 @@ export const createUser = async ({
 			},
 		);
 		return res.data;
-	} catch (_error) {
-		throw new InternalServerError("Failed to create Tink user");
+	} catch (error: any) {
+		throw new InternalServerError(
+			error.response?.data?.errorMessage || "Failed to create Tink user",
+		);
 	}
 };

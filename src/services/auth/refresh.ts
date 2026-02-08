@@ -14,6 +14,7 @@ export const refresh = async (refreshToken: string) => {
 		) as JwtPayload;
 
 		const refreshedTokens = assignTokens({
+			id: verifiedToken.id as string,
 			username: verifiedToken.username,
 			email: verifiedToken.email,
 		});

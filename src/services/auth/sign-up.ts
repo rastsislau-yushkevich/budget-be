@@ -34,13 +34,14 @@ export const signUp = async ({
 		market,
 	});
 
-	const tokens = assignTokens({
-		email: newUser.email,
-		username: newUser.username,
+	const savedUser = await userRepo.save({
+		...newUser,
 	});
 
-	const savedUser = await userRepo.save({
-		...newUser
+	const tokens = assignTokens({
+		id: savedUser.id,
+		email: savedUser.email,
+		username: savedUser.username,
 	});
 
 	delete savedUser.password;

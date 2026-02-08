@@ -37,4 +37,16 @@ export class User {
 
 	@Column()
 	locale: string;
+
+	@Column({ nullable: true })
+	tinkCredentialsId: string;
+
+	@Column({ nullable: true })
+	tinkAuthCode: string;
+
+	@Column({ nullable: true })
+	tinkAccessToken: string;
+
+	@Column({ nullable: true })
+	tinkAccessTokenExpiry: Date;
 }

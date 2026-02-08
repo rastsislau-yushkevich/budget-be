@@ -22,7 +22,11 @@ export const signIn = async ({
 		throw new UnauthorizedError("Invalid password");
 	}
 
-	const tokens = assignTokens({ email: user.email, username: user.username });
+	const tokens = assignTokens({
+		id: user.id,
+		email: user.email,
+		username: user.username,
+	});
 
 	return tokens;
 };
