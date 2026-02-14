@@ -30,6 +30,9 @@ export const createUser = async ({
 		);
 		return res.data;
 	} catch (error: any) {
+		if (error.response?.status === 409) {
+			return { external_user_id: userId };
+		}
 		throw new InternalServerError(
 			error.response?.data?.errorMessage || "Failed to create Tink user",
 		);
