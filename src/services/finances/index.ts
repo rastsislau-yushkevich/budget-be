@@ -6,41 +6,45 @@ const transactionRepository = AppDataSource.getRepository(Transaction);
 
 export const getTransactions = async ({
 	userId,
-	monthIndex,
+	cursor,
+	limit,
 }: {
 	userId: string;
-	monthIndex: number;
+	cursor?: string;
+	limit?: number;
 }) => {
 	try {
-		const now = new Date();
-		const targetDate = new Date(
-			now.getFullYear(),
-			now.getMonth() - monthIndex,
-			1,
-		);
-		const year = targetDate.getFullYear();
-		const month = targetDate.getMonth();
-
-		const startDate = new Date(year, month, 1);
-		const endDate = new Date(year, month + 1, 0, 23, 59, 59);
-
-		const transactions = await transactionRepository
+		const queryBuilder = transactionRepository
 			.createQueryBuilder("t")
 			.where("t.userId = :userId", { userId })
-			.andWhere("t.transactionDate BETWEEN :startDate AND :endDate", {
-				startDate,
-				endDate,
-			})
 			.orderBy("t.transactionDate", "DESC")
-			.getMany();
+			.limit(limit + 1 || 20);
 
-		return transactions.map((t) => ({
-			id: t.id,
-			name: t.description,
-			category: t.category,
-			amount: Number(t.amount),
-			date: t.transactionDate,
-		}));
+		if (cursor) {
+			queryBuilder.where("t.transactionDate < :cursor", { cursor });
+		}
+
+		const transactions = await queryBuilder.getMany();
+
+		const hasNextPage = transactions.length > limit;
+		if (hasNextPage) {
+			transactions.pop();
+		}
+
+		const nextCursor = hasNextPage
+			? transactions[transactions.length - 1].transactionDate
+			: null;
+
+		return {
+			transactions: transactions.map((t) => ({
+				id: t.id,
+				name: t.description,
+				category: t.category,
+				amount: Number(t.amount),
+				date: t.transactionDate,
+			})),
+			cursor: nextCursor,
+		};
 	} catch (error) {
 		throw new InternalServerError("Failed to fetch transactions");
 	}
