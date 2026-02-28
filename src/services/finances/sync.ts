@@ -166,7 +166,7 @@ export const syncTransactions = async ({ userId }: { userId: string }) => {
 
 		for (const tinkTx of transactions) {
 			const exists = await transactionRepository.findOne({
-				where: { tinkId: tinkTx.id },
+				where: { userId: user.id, tinkId: tinkTx.id },
 			});
 
 			if (exists) continue;
