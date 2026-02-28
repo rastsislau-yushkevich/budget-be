@@ -14,19 +14,22 @@ export const getTransactions = async ({
 	limit?: number;
 }) => {
 	try {
+		const pageSize = limit ?? 20;
+
 		const queryBuilder = transactionRepository
 			.createQueryBuilder("t")
 			.where("t.userId = :userId", { userId })
 			.orderBy("t.transactionDate", "DESC")
-			.limit(limit + 1 || 20);
+			.addOrderBy("t.id", "DESC")
+			.limit(pageSize + 1);
 
 		if (cursor) {
-			queryBuilder.where("t.transactionDate < :cursor", { cursor });
+			queryBuilder.andWhere("t.transactionDate < :cursor", { cursor });
 		}
 
 		const transactions = await queryBuilder.getMany();
 
-		const hasNextPage = transactions.length > limit;
+		const hasNextPage = transactions.length > pageSize;
 		if (hasNextPage) {
 			transactions.pop();
 		}
